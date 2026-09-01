@@ -1,0 +1,624 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Chatabot</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #212121;
+      color: #ffffff;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* =========================
+       APP
+    ========================= */
+
+    .app {
+      display: flex;
+      height: 100vh;
+      width: 100%;
+    }
+
+    /* =========================
+       SIDEBAR
+    ========================= */
+
+    .sidebar {
+      width: 260px;
+      background: #171717;
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 10px 20px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      background: #ffffff;
+      color: #171717;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .new-chat {
+      width: 100%;
+      border: 1px solid #3a3a3a;
+      background: transparent;
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: left;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .new-chat:hover {
+      background: #2a2a2a;
+    }
+
+    .history-title {
+      font-size: 12px;
+      color: #8e8e8e;
+      padding: 0 10px 10px;
+    }
+
+    .history {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      padding: 10px;
+      border-radius: 7px;
+      color: #d0d0d0;
+      font-size: 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-item:hover {
+      background: #2a2a2a;
+    }
+
+    .profile {
+      border-top: 1px solid #303030;
+      padding-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #444;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+    }
+
+    .profile-name {
+      font-size: 14px;
+    }
+
+    /* =========================
+       MAIN
+    ========================= */
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .topbar {
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+      border-bottom: 1px solid #303030;
+      background: #212121;
+    }
+
+    .model-name {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .menu-button {
+      display: none;
+      border: none;
+      background: transparent;
+      color: white;
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    /* =========================
+       CHAT
+    ========================= */
+
+    .chat-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 30px 20px 140px;
+    }
+
+    .messages {
+      max-width: 850px;
+      margin: 0 auto;
+    }
+
+    .welcome {
+      min-height: 65vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .welcome-logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      background: white;
+      color: #171717;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: bold;
+      margin-bottom: 22px;
+    }
+
+    .welcome h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .welcome p {
+      color: #9b9b9b;
+      font-size: 15px;
+    }
+
+    .message {
+      display: flex;
+      gap: 14px;
+      margin: 25px 0;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    .message-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .user-avatar {
+      background: #555;
+    }
+
+    .bot-avatar {
+      background: white;
+      color: #171717;
+    }
+
+    .message-content {
+      flex: 1;
+      padding-top: 4px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* =========================
+       INPUT
+    ========================= */
+
+    .input-wrapper {
+      position: fixed;
+      bottom: 0;
+      left: 260px;
+      right: 0;
+      padding: 20px;
+      background: linear-gradient(
+        transparent,
+        #212121 35%
+      );
+    }
+
+    .input-box {
+      max-width: 850px;
+      margin: 0 auto;
+      background: #2f2f2f;
+      border: 1px solid #444;
+      border-radius: 15px;
+      display: flex;
+      align-items: flex-end;
+      padding: 10px;
+      box-shadow: 0 5px 30px rgba(0,0,0,0.2);
+    }
+
+    textarea {
+      flex: 1;
+      resize: none;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: white;
+      font-family: inherit;
+      font-size: 15px;
+      line-height: 1.5;
+      max-height: 150px;
+      min-height: 24px;
+      padding: 6px 8px;
+    }
+
+    textarea::placeholder {
+      color: #8e8e8e;
+    }
+
+    .send-button {
+      width: 38px;
+      height: 38px;
+      border: none;
+      border-radius: 10px;
+      background: white;
+      color: #171717;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .send-button:hover {
+      opacity: 0.85;
+    }
+
+    .send-button:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    .disclaimer {
+      text-align: center;
+      color: #777;
+      font-size: 11px;
+      margin-top: 8px;
+    }
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media (max-width: 700px) {
+
+      .sidebar {
+        position: fixed;
+        left: -260px;
+        top: 0;
+        bottom: 0;
+        z-index: 10;
+        transition: left 0.25s ease;
+      }
+
+      .sidebar.open {
+        left: 0;
+      }
+
+      .menu-button {
+        display: block;
+      }
+
+      .topbar {
+        padding: 0 15px;
+      }
+
+      .input-wrapper {
+        left: 0;
+        padding: 12px;
+      }
+
+      .chat-area {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+      .welcome h1 {
+        font-size: 27px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+
+      <div class="brand">
+        <div class="brand-icon">C</div>
+        <span>Chatabot</span>
+      </div>
+
+      <button class="new-chat" onclick="newChat()">
+        ＋ New chat
+      </button>
+
+      <div class="history-title">
+        Recent chats
+      </div>
+
+      <div class="history" id="history"></div>
+
+      <div class="profile">
+        <div class="avatar">U</div>
+        <div class="profile-name">User</div>
+      </div>
+
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <header class="topbar">
+        <button class="menu-button" onclick="toggleSidebar()">☰</button>
+        <div class="model-name">Chatabot</div>
+        <div></div>
+      </header>
+
+      <section class="chat-area" id="chatArea">
+
+        <div class="messages" id="messages">
+
+          <div class="welcome" id="welcome">
+
+            <div class="welcome-logo">C</div>
+
+            <h1>How can I help you?</h1>
+
+            <p>Ask Chatabot anything.</p>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- INPUT -->
+      <div class="input-wrapper">
+
+        <div class="input-box">
+
+          <textarea
+            id="userInput"
+            placeholder="Message Chatabot..."
+            rows="1"
+            oninput="resizeTextarea()"
+            onkeydown="handleKey(event)"
+          ></textarea>
+
+          <button
+            class="send-button"
+            id="sendButton"
+            onclick="sendMessage()"
+          >
+            ↑
+          </button>
+
+        </div>
+
+        <div class="disclaimer">
+          Chatabot can make mistakes. Check important information.
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+
+  <script>
+
+    const input = document.getElementById("userInput");
+    const messages = document.getElementById("messages");
+    const welcome = document.getElementById("welcome");
+    const history = document.getElementById("history");
+    const chatArea = document.getElementById("chatArea");
+
+    let currentChat = [];
+
+    /* =========================
+       SEND MESSAGE
+    ========================= */
+
+    function sendMessage() {
+
+      const text = input.value.trim();
+
+      if (!text) return;
+
+      if (welcome) {
+        welcome.style.display = "none";
+      }
+
+      addMessage(text, "user");
+
+      currentChat.push({
+        role: "user",
+        content: text
+      });
+
+      input.value = "";
+      resizeTextarea();
+
+      setTimeout(() => {
+
+        const reply =
+          "Hello! I'm Chatabot. 🤖\n\n" +
+          "Your message was received successfully.\n\n" +
+          "The AI backend will be connected in the next step.";
+
+        addMessage(reply, "bot");
+
+        currentChat.push({
+          role: "bot",
+          content: reply
+        });
+
+      }, 500);
+
+    }
+
+
+    /* =========================
+       ADD MESSAGE
+    ========================= */
+
+    function addMessage(text, type) {
+
+      const message = document.createElement("div");
+      message.className = "message";
+
+      const avatar = document.createElement("div");
+      avatar.className =
+        "message-avatar " +
+        (type === "user" ? "user-avatar" : "bot-avatar");
+
+      avatar.textContent =
+        type === "user" ? "U" : "C";
+
+      const content = document.createElement("div");
+      content.className = "message-content";
+      content.textContent = text;
+
+      message.appendChild(avatar);
+      message.appendChild(content);
+
+      messages.appendChild(message);
+
+      chatArea.scrollTop = chatArea.scrollHeight;
+
+    }
+
+
+    /* =========================
+       NEW CHAT
+    ========================= */
+
+    function newChat() {
+
+      messages.innerHTML = "";
+
+      const newWelcome = document.createElement("div");
+
+      newWelcome.className = "welcome";
+
+      newWelcome.innerHTML = `
+        <div class="welcome-logo">C</div>
+        <h1>How can I help you?</h1>
+        <p>Ask Chatabot anything.</p>
+      `;
+
+      messages.appendChild(newWelcome);
+
+      currentChat = [];
+
+      input.value = "";
+
+      resizeTextarea();
+
+    }
+
+
+    /* =========================
+       ENTER TO SEND
+    ========================= */
+
+    function handleKey(event) {
+
+      if (event.key === "Enter" && !event.shiftKey) {
+
+        event.preventDefault();
+
+        sendMessage();
+
+      }
+
+    }
+
+
+    /* =========================
+       TEXTAREA RESIZE
+    ========================= */
+
+    function resizeTextarea() {
+
+      input.style.height = "auto";
+
+      input.style.height =
+        Math.min(input.scrollHeight, 150) + "px";
+
+    }
+
+
+    /* =========================
+       MOBILE SIDEBAR
+    ========================= */
+
+    function toggleSidebar() {
+
+      document
+        .getElementById("sidebar")
+        .classList.toggle("open");
+
+    }
+
+  </script>
+
+</body>
+</html>
+```
